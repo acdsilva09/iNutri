@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "884667219001",
+    "project_id": "inutri-9f80f",
+    "storage_bucket": "inutri-9f80f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884667219001:android:5cd2ff55456748d497a1e8",
+        "android_client_info": {
+          "package_name": "com.example.inutri"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "884667219001-fipa93v8v7qjmm08rigkip8q6j1bbrb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcmtWcvWYneT_3yZHXJJT5bfsA1Wv2nFs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "884667219001-fipa93v8v7qjmm08rigkip8q6j1bbrb1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
