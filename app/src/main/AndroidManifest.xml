@@ -14,17 +14,36 @@
         android:theme="@style/Theme.INutri"
         tools:targetApi="31">
         <activity
-            android:name=".CalculoTMB"
+            android:name=".RecuperaCadastroActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="false"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.INutri.NoActionBar" />
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:label="@string/title_activity_splash"
+            android:theme="@style/Theme.INutri">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".CadastroActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="true"
+            android:label="@string/title_activity_cadastro"
+            android:theme="@style/Theme.INutri.Fullscreen" />
+        <activity
+            android:name=".CalculoTMB"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "884667219001-ceauknnoe4eh6dchc1lesb1b0eus7du1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.inutri",
+            "certificate_hash": "adc1ea9c907f9f61b8cc7686b66fd44721e86b91"
+          }
+        },
+        {
           "client_id": "884667219001-fipa93v8v7qjmm08rigkip8q6j1bbrb1.apps.googleusercontent.com",
           "client_type": 3
         }
