@@ -60,7 +60,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:clickable="true"
-            android:onClick="clickButtonCadastro"
             android:text="Cadastre-se"
             android:textSize="18dp" />
 
@@ -70,7 +69,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:clickable="true"
-            android:onClick="clickButtonRecuperaSenha"
             android:text="Esqueci minha senha"
             android:textSize="18dp" />
 

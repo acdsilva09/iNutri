@@ -14,16 +14,12 @@
       },
       "oauth_client": [
         {
-          "client_id": "884667219001-ceauknnoe4eh6dchc1lesb1b0eus7du1.apps.googleusercontent.com",
+          "client_id": "884667219001-ll4lghur4l4jfdb3hhn3ik0ok738j74u.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.inutri",
-            "certificate_hash": "adc1ea9c907f9f61b8cc7686b66fd44721e86b91"
+            "certificate_hash": "a27a9b6bdffb45b58b0cbdc596603ef32f5475ec"
           }
-        },
-        {
-          "client_id": "884667219001-fipa93v8v7qjmm08rigkip8q6j1bbrb1.apps.googleusercontent.com",
-          "client_type": 3
         }
       ],
       "api_key": [
@@ -35,7 +31,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "884667219001-fipa93v8v7qjmm08rigkip8q6j1bbrb1.apps.googleusercontent.com",
+              "client_id": "884667219001-a079q48ecd6h2mrtp8mcsgfn06pclp4n.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

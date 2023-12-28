@@ -1,11 +1,17 @@
 package com.example.inutri;
 
 
+import static android.content.ContentValues.TAG;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -47,12 +53,15 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(
-                GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken("884667219001-fipa93v8v7qjmm08rigkip8q6j1bbrb1.apps.googleusercontent.com").requestEmail().build();
+                GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.web_client_id))
+                .requestEmail()
+                .build();
 
         googleSignInClient = GoogleSignIn.getClient(this,googleSignInOptions);
 
         binding.buttonLogin.setOnClickListener(view -> clickButtonLogin(binding.editTextUser.getText().toString(),
-                        binding.editTextPassword.getText().toString()));
+                binding.editTextPassword.getText().toString()));
 
         binding.buttonGoogleLogin.setOnClickListener(v -> {
             clickButtonLoginGoogle();
@@ -64,20 +73,47 @@ public class LoginActivity extends AppCompatActivity {
     private void clickButtonLoginGoogle() {
         Intent intent = googleSignInClient.getSignInIntent();
         startActivityForResult(intent,1);
+       // openActivity.launch(intent);
     }
 
-    private void loginGoogle(String token) {
-        AuthCredential authCredential = GoogleAuthProvider.getCredential(token, null);
-        mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, task -> {
-            if(task.isSuccessful()){
-                Toast.makeText(getApplicationContext(), "Login Google Efetuado com Sucesso!!.",
-                        Toast.LENGTH_SHORT).show();
-                startMainActivity();
-            }else{
-                Toast.makeText(getApplicationContext(), "Erro ao efetuar login Google",
-                        Toast.LENGTH_SHORT).show();
+    ActivityResultLauncher<Intent> openActivity = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if(result.getResultCode()== Activity.RESULT_OK){
+                    Intent intent = result.getData();
+
+                    Task<GoogleSignInAccount> tarefa = GoogleSignIn.getSignedInAccountFromIntent(intent);
+                    Log.d(TAG, "tarefa:"+ tarefa.getResult()+ "\nIntent:" + intent.getData());
+                    try {
+                        GoogleSignInAccount conta = tarefa.getResult(ApiException.class);
+                        loginGoogle(conta.getIdToken());
+                    } catch (ApiException e) {
+                        // Tratamento específico para ApiException ao obter a conta do Google Sign-In
+                        e.printStackTrace();
+                        Toast.makeText(getApplicationContext(), "Erro ao efetuar login: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
-        });
+    );
+
+    private void loginGoogle(String token) {
+
+        try {
+            AuthCredential authCredential = GoogleAuthProvider.getCredential(token, null);
+            mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getApplicationContext(), "Login Google Efetuado com Sucesso!!.",
+                            Toast.LENGTH_SHORT).show();
+                    startMainActivity();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Erro ao efetuar login Google",
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (RuntimeException e){
+
+        }
     }
 
     @Override
@@ -86,39 +122,24 @@ public class LoginActivity extends AppCompatActivity {
 
         if (requestCode == 1) {
             Task<GoogleSignInAccount> tarefa = GoogleSignIn.getSignedInAccountFromIntent(intent);
-            tarefa.addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    GoogleSignInAccount conta = null;
-                    try {
-                        conta = task.getResult(ApiException.class);
-                        if (conta != null) {
+
+            try {
+                        GoogleSignInAccount conta = tarefa.getResult(ApiException.class);
+                        Toast.makeText(getApplicationContext(), ""+ conta.getIdToken(),
+                        Toast.LENGTH_SHORT).show();
+                        if(!conta.getIdToken().isEmpty()){
                             loginGoogle(conta.getIdToken());
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Erro: Conta nula ao efetuar login",
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Erro ao capturar Token",
                                     Toast.LENGTH_SHORT).show();
                         }
+
                     } catch (ApiException e) {
                         // Tratamento específico para ApiException ao obter a conta do Google Sign-In
                         e.printStackTrace();
                         Toast.makeText(getApplicationContext(), "Erro ao efetuar login: " + e.getMessage(),
                                 Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    // A task falhou, tratamento de exceção ou exibição de mensagem de erro
-                    Exception e = task.getException();
-                    if (e instanceof ApiException) {
-
-                        // Tratamento específico para ApiException
-                        Toast.makeText(getApplicationContext(), "Erro ao efetuar login",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Tratamento para outras exceções (diferentes de ApiException)
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), "Erro inesperado ao efetuar login",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
         } else {
             // Se o requestCode não for igual a 1, lidar com isso adequadamente
             Toast.makeText(getApplicationContext(), "Código de solicitação inválido",
