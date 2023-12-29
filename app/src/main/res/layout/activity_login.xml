@@ -6,26 +6,41 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:layout_gravity="center"
-    android:gravity="center"
+    android:gravity="center_horizontal"
+    android:background="@color/light_blue_theme"
     tools:context=".LoginActivity">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:background="@drawable/logo_linear_layout">
 
         <ImageView
             android:layout_width="90dp"
             android:layout_height="90dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="40dp"
             android:background="@drawable/logo_temp"
-             />
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="50dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/editTextUser"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/edit_text_login"
             android:ems="10"
             android:hint="Email"
@@ -37,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:inputType="textPassword"
             android:hint="Senha"
             android:maxLines="1"
@@ -48,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Login"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:theme="@style/Widget.AppCompat.Button.Colored"
             android:background="@drawable/login_button"/>
 
@@ -65,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:scaleType="fitCenter"
                 android:clickable="true"
-                android:textColor="#aaaaaa"
+                android:textColor="#ddd"
                 android:text="Cadastre-se"
                 android:textSize="12dp" />
             <Space
@@ -76,12 +91,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
-                android:textColor="#aaaaaa"
+                android:textColor="#ddd"
                 android:scaleType="fitCenter"
                 android:text="Recuperar senha"
                 android:textSize="12dp" />
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:text="----------------------------"
+                android:textColor="#ddd" />
 
         <TextView
             android:id="@+id/textView3"
@@ -89,14 +117,25 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
-            android:textColor="#aaaaaa"
-            android:text="ou" />
+            android:text="ou"
+            android:textColor="#ddd" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:text="----------------------------"
+                android:textColor="#ddd" />
+
+        </LinearLayout>
 
 
         <com.google.android.gms.common.SignInButton
             android:id="@+id/buttonGoogleLogin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            />
 
 
 

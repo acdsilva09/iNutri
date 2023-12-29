@@ -2,8 +2,11 @@
     <item>
         <shape android:shape="rectangle">
             <solid android:color="#fff"/> <!-- cor do sólido -->
-            <corners android:radius="30dp"/> <!-- valor do arredondamento das bordas -->
-            <stroke android:color="#F7F3F3" android:width="2dp"/> <!-- cor da borda e tamanho dela -->
+            <corners
+                android:bottomLeftRadius="0dp"
+                android:bottomRightRadius="2500dp"
+                android:topLeftRadius="0dp"
+                android:topRightRadius="0dp"/>
             <padding android:bottom="8dp" android:left="8dp" android:right="8dp" android:top="8dp"/>
         </shape>
     </item>
