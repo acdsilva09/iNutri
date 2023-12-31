@@ -7,9 +7,9 @@
             android:layout_width="150dp">
 
             <gradient
-                android:startColor="#ffffff"
+                android:startColor="#7EFF38"
 
-                android:endColor="#eeeeee"
+                android:endColor="#C0F385"
                 android:angle="0"/>
 
             <corners
@@ -33,9 +33,9 @@
             android:layout_width="150dp">
 
             <gradient
-                android:startColor="#9CA3A3"
+                android:startColor="#6CBC26"
 
-                android:endColor="#929898"
+                android:endColor="#5CC37E"
                 android:angle="0"/>
 
             <corners

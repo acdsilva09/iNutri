@@ -11,15 +11,10 @@
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
-    <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.example.inutri.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.example.inutri.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_alimentos"
+        android:name="com.example.inutri.ui.camera.CameraFragment"
+        android:label="@string/menu_alimentos"
+        tools:layout="@layout/fragment_camera" />
 </navigation>

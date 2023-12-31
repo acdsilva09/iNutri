@@ -1,18 +1,15 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-
         <shape android:shape="rectangle">
             <gradient
-                android:startColor="#000C5A"
-                android:centerColor="#3FA2F1"
-                android:endColor="#95FDFD"
-                android:angle="360"/>
-
+                android:startColor="#ffffff"
+                android:endColor="#EBEDED"
+                android:angle="30"/>
             <corners
                 android:bottomLeftRadius="0dp"
-                android:bottomRightRadius="2500dp"
-                android:topLeftRadius="0dp"
-                android:topRightRadius="0dp"/>
+                android:bottomRightRadius="0dp"
+                android:topLeftRadius="20dp"
+                android:topRightRadius="20dp"/>
             <padding android:bottom="8dp" android:left="8dp" android:right="8dp" android:top="8dp"/>
         </shape>
     </item>

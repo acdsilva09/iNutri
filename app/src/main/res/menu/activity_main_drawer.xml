@@ -9,18 +9,9 @@
             android:icon="@drawable/inicio"
             android:title="Início" />
         <item
-            android:id="@+id/nav_dados"
-            android:icon="@drawable/usuario"
-            android:title="Dados Pessoais" />
-        <item
-            android:id="@+id/nav_dieta"
-            android:icon="@drawable/dieta"
-            android:title="Dieta" />
-
-        <item
-            android:id="@+id/nav_receitas"
-            android:icon="@drawable/receita"
-            android:title="TODO">
+            android:id="@+id/nav_alimentos"
+            android:icon="@drawable/scanner"
+            android:title="Alimentos">
 
         </item>
     </group>

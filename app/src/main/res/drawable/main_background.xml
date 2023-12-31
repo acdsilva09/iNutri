@@ -1,0 +1,15 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+     <!-- Shape (retângulo) como base -->
+     <item>
+          <shape android:shape="rectangle">
+               <solid android:color="@color/yellow" /> <!-- Cor transparente para que a imagem seja visível -->
+          </shape>
+     </item>
+     <!-- Imagem como plano de fundo -->
+     <item>
+          <bitmap
+              android:src="@drawable/background"
+              android:gravity="center"
+              android:alpha="0.2"/> <!-- Defina a sua imagem aqui -->
+     </item>
+</layer-list>
