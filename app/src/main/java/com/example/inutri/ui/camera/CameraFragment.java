@@ -5,10 +5,15 @@ import static android.app.Activity.RESULT_OK;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.Preview;
@@ -44,38 +49,40 @@ import java.util.concurrent.Executor;
 public class CameraFragment extends Fragment {
 
     private FragmentCameraBinding binding;
-    String currentPhotoPath;
-
+    private String currentPhotoPath;
+    private static final String STATE_PHOTO_PATH = "currentPhotoPath";
+    private static final String STATE_ROOT_ID = "rootId";
+    private static final String STATE_IS_VIEW_CREATED = "isViewCreated";
     private Bitmap imageBitmap = null;
-
-    PreviewView previewView;
+    private View root;
+    private PreviewView previewView;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private RecyclerView resultRv;
-
     private ImageCapture imageCapture;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        CameraViewModel cameraViewModel =
-                new ViewModelProvider(this).get(CameraViewModel.class);
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        boolean isViewCreated = false;
 
-        binding = FragmentCameraBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-        
-        binding.scannerButton.setOnClickListener(v -> scannerButton());
-        binding.galeriaButton.setOnClickListener(v -> buscarGaleriaButton());
+        if (savedInstanceState != null) {
+            isViewCreated = savedInstanceState.getBoolean(STATE_IS_VIEW_CREATED);
+            int rootId = savedInstanceState.getInt(STATE_ROOT_ID);
+            root = container.findViewById(rootId);
+            binding = FragmentCameraBinding.bind(root);
+            currentPhotoPath = savedInstanceState.getString(STATE_PHOTO_PATH);
+        }
 
-      //  ImageCapture imageCapture =
-      //          new ImageCapture.Builder()
-      //                  .setTargetRotation(root.getDisplay().getRotation())
-      //                  .build();
+        if (!isViewCreated) {
+            binding = FragmentCameraBinding.inflate(inflater, container, false);
+            root = binding.getRoot();
 
-
-
+            binding.scannerButton.setOnClickListener(v -> scannerButton());
+            binding.galeriaButton.setOnClickListener(v -> buscarGaleriaButton());
+        }
 
         return root;
     }
-
     private void buscarGaleriaButton() {
             Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
             File f = new File(currentPhotoPath);
@@ -89,6 +96,13 @@ public class CameraFragment extends Fragment {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        if (storageDir != null && !storageDir.exists()) {
+            if (!storageDir.mkdirs()) {
+                return null; // Falha ao criar o diretório de armazenamento
+            }
+        }
+
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -141,7 +155,36 @@ public class CameraFragment extends Fragment {
                     File imgFile = new File(currentPhotoPath);
                     if (imgFile.exists()) {
                         imageBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                        binding.imageCaptura.setImageBitmap(imageBitmap);
+                        // Verificar a orientação da imagem
+                        ExifInterface exif;
+                        try {
+                            exif = new ExifInterface(currentPhotoPath);
+                            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+
+                            int rotationDegrees = 0;
+                            switch (orientation) {
+                                case ExifInterface.ORIENTATION_ROTATE_90:
+                                    rotationDegrees = 90;
+                                    break;
+                                case ExifInterface.ORIENTATION_ROTATE_180:
+                                    rotationDegrees = 180;
+                                    break;
+                                case ExifInterface.ORIENTATION_ROTATE_270:
+                                    rotationDegrees = 270;
+                                    break;
+                            }
+
+                            // Rotacionar a imagem se necessário
+                            if (rotationDegrees != 0) {
+                                Matrix matrix = new Matrix();
+                                matrix.postRotate(rotationDegrees);
+                                imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), matrix, true);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Drawable imageDrawable = new BitmapDrawable(getResources(),imageBitmap);
+                        binding.imageCaptura.setBackground(imageDrawable);
                     }
                 }
             }
@@ -161,4 +204,29 @@ public class CameraFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+
+
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(STATE_PHOTO_PATH, currentPhotoPath);
+        if (root != null) {
+            outState.putInt(STATE_ROOT_ID, root.getId());
+            outState.putBoolean(STATE_IS_VIEW_CREATED, true);
+        }
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            int rootId = savedInstanceState.getInt(STATE_ROOT_ID);
+            View view = requireView();
+            root = view.findViewById(rootId);
+            binding = FragmentCameraBinding.bind(view);
+            currentPhotoPath = savedInstanceState.getString(STATE_PHOTO_PATH);
+        }
+    }
+
 }
