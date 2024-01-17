@@ -48,6 +48,7 @@ import java.util.concurrent.Executor;
 
 public class CameraFragment extends Fragment {
 
+    private static final String STATE_BINDING = "bindingstatus";
     private FragmentCameraBinding binding;
     private String currentPhotoPath;
     private static final String STATE_PHOTO_PATH = "currentPhotoPath";
@@ -68,7 +69,9 @@ public class CameraFragment extends Fragment {
         if (savedInstanceState != null) {
             isViewCreated = savedInstanceState.getBoolean(STATE_IS_VIEW_CREATED);
             int rootId = savedInstanceState.getInt(STATE_ROOT_ID);
+            currentPhotoPath = savedInstanceState.getString(STATE_PHOTO_PATH);
             root = container.findViewById(rootId);
+
         }
 
         if (!isViewCreated) {
@@ -209,6 +212,8 @@ public class CameraFragment extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(STATE_PHOTO_PATH, currentPhotoPath);
+        outState.putBoolean(STATE_IS_VIEW_CREATED, true);
+        outState.putBinder(STATE_BINDING,binding);
     }
 
     @Override
