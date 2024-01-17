@@ -69,8 +69,6 @@ public class CameraFragment extends Fragment {
             isViewCreated = savedInstanceState.getBoolean(STATE_IS_VIEW_CREATED);
             int rootId = savedInstanceState.getInt(STATE_ROOT_ID);
             root = container.findViewById(rootId);
-            binding = FragmentCameraBinding.bind(root);
-            currentPhotoPath = savedInstanceState.getString(STATE_PHOTO_PATH);
         }
 
         if (!isViewCreated) {
@@ -211,21 +209,27 @@ public class CameraFragment extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(STATE_PHOTO_PATH, currentPhotoPath);
-        if (root != null) {
-            outState.putInt(STATE_ROOT_ID, root.getId());
-            outState.putBoolean(STATE_IS_VIEW_CREATED, true);
-        }
     }
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
+
         if (savedInstanceState != null) {
-            int rootId = savedInstanceState.getInt(STATE_ROOT_ID);
-            View view = requireView();
-            root = view.findViewById(rootId);
-            binding = FragmentCameraBinding.bind(view);
             currentPhotoPath = savedInstanceState.getString(STATE_PHOTO_PATH);
+            int rootId = savedInstanceState.getInt(STATE_ROOT_ID, View.NO_ID);
+            if (rootId != View.NO_ID) {
+                // Root ID is saved, attempt to find the root view
+                View view = getActivity().findViewById(rootId);
+                if (view != null) {
+                    root = view;
+                }
+            }
+        }
+
+        // If binding is null, try to rebind
+        if (binding == null && root != null) {
+            binding = FragmentCameraBinding.bind(root);
         }
     }
 
