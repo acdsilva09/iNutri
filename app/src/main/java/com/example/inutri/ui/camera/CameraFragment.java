@@ -3,6 +3,7 @@ package com.example.inutri.ui.camera;
 import static android.app.Activity.RESULT_OK;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -67,7 +68,7 @@ public class CameraFragment extends Fragment {
         boolean isViewCreated = false;
 
         if (savedInstanceState != null) {
-            isViewCreated = savedInstanceState.getBoolean(STATE_IS_VIEW_CREATED);
+            //isViewCreated = savedInstanceState.getBoolean(STATE_IS_VIEW_CREATED);
             int rootId = savedInstanceState.getInt(STATE_ROOT_ID);
             currentPhotoPath = savedInstanceState.getString(STATE_PHOTO_PATH);
             root = container.findViewById(rootId);
@@ -112,6 +113,9 @@ public class CameraFragment extends Fragment {
 
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = image.getAbsolutePath();
+
+
+
         return image;
     }
 
@@ -137,6 +141,8 @@ public class CameraFragment extends Fragment {
                         "com.example.inutri.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                takePictureIntent.putExtra(MediaStore.EXTRA_SCREEN_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
                 startActivityForResult(takePictureIntent, 1);
             }
         }
@@ -213,7 +219,9 @@ public class CameraFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putString(STATE_PHOTO_PATH, currentPhotoPath);
         outState.putBoolean(STATE_IS_VIEW_CREATED, true);
-        outState.putBinder(STATE_BINDING,binding);
+
+
+
     }
 
     @Override
@@ -235,6 +243,12 @@ public class CameraFragment extends Fragment {
         // If binding is null, try to rebind
         if (binding == null && root != null) {
             binding = FragmentCameraBinding.bind(root);
+        }
+
+        // Initialize UI components
+        if (binding != null) {
+            binding.scannerButton.setOnClickListener(v -> scannerButton());
+            binding.galeriaButton.setOnClickListener(v -> buscarGaleriaButton());
         }
     }
 
