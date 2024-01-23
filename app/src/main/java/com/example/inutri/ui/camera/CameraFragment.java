@@ -148,52 +148,98 @@ public class CameraFragment extends Fragment {
         }
     }
 
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
 
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            if (imageBitmap != null) {
-                binding.imageCaptura.setImageBitmap(imageBitmap);
-            } else {
-                // Carregar a imagem do arquivo especificado pelo caminho
-                if (currentPhotoPath != null) {
-                    File imgFile = new File(currentPhotoPath);
-                    if (imgFile.exists()) {
-                        imageBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                        // Verificar a orientação da imagem
-                        ExifInterface exif;
-                        try {
-                            exif = new ExifInterface(currentPhotoPath);
-                            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            try {
+                if (imageBitmap != null) {
+                    binding.imageCaptura.setImageBitmap(imageBitmap);
+                } else {
+                    // Carregar a imagem do arquivo especificado pelo caminho
+                    if (currentPhotoPath != null) {
+                        File imgFile = new File(currentPhotoPath);
+                        if (imgFile.exists()) {
+                            try {
+                                BitmapFactory.Options options = new BitmapFactory.Options();
+                                options.inJustDecodeBounds = true;
+                                BitmapFactory.decodeFile(imgFile.getAbsolutePath(), options);
 
-                            int rotationDegrees = 0;
-                            switch (orientation) {
-                                case ExifInterface.ORIENTATION_ROTATE_90:
-                                    rotationDegrees = 90;
-                                    break;
-                                case ExifInterface.ORIENTATION_ROTATE_180:
-                                    rotationDegrees = 180;
-                                    break;
-                                case ExifInterface.ORIENTATION_ROTATE_270:
-                                    rotationDegrees = 270;
-                                    break;
-                            }
+                                int targetWidth = 800; // Escolha o tamanho desejado para largura da imagem
+                                int targetHeight = (int) (options.outHeight * ((float) targetWidth / options.outWidth));
 
-                            // Rotacionar a imagem se necessário
-                            if (rotationDegrees != 0) {
-                                Matrix matrix = new Matrix();
-                                matrix.postRotate(rotationDegrees);
-                                imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), matrix, true);
+                                // Configura as opções para carregar a imagem redimensionada
+                                options.inJustDecodeBounds = false;
+                                options.inSampleSize = calculateInSampleSize(options, targetWidth, targetHeight);
+
+                                imageBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath(), options);
+
+
+                                // Verificar a orientação da imagem
+                            ExifInterface exif;
+                            try {
+                                exif = new ExifInterface(currentPhotoPath);
+                                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+
+                                int rotationDegrees = 0;
+                                switch (orientation) {
+                                    case ExifInterface.ORIENTATION_ROTATE_90:
+                                        rotationDegrees = 90;
+                                        break;
+                                    case ExifInterface.ORIENTATION_ROTATE_180:
+                                        rotationDegrees = 180;
+                                        break;
+                                    case ExifInterface.ORIENTATION_ROTATE_270:
+                                        rotationDegrees = 270;
+                                        break;
+                                }
+
+                                // Rotacionar a imagem se necessário
+                                if (rotationDegrees != 0) {
+                                    Matrix matrix = new Matrix();
+                                    matrix.postRotate(rotationDegrees);
+                                    imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), matrix, true);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                                Drawable imageDrawable = new BitmapDrawable(getResources(),imageBitmap);
+                                binding.imageCaptura.setBackground(imageDrawable);
+
+
+                            } catch (OutOfMemoryError e) {
+                                // Lidar com exceção de falta de memória aqui
+                                e.printStackTrace();
+                                Toast.makeText(getActivity(), "Erro ao manipular o bitmap (dentro do segundo try): " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            } catch (Exception e) {
+                                // Lidar com outras exceções aqui
+                                e.printStackTrace();
+                                Toast.makeText(getActivity(), "Erro desconhecido (dentro do segundo try): " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
                         }
-                        Drawable imageDrawable = new BitmapDrawable(getResources(),imageBitmap);
-                        binding.imageCaptura.setBackground(imageDrawable);
                     }
                 }
+            } catch (Exception e) {
+                // Lidar com exceções gerais aqui
+                e.printStackTrace();
+                Toast.makeText(getActivity(), "Erro desconhecido (fora do segundo try): " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -209,7 +255,7 @@ public class CameraFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        //binding = null;
     }
 
 
