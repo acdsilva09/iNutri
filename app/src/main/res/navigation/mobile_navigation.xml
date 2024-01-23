@@ -17,4 +17,10 @@
         android:name="com.example.inutri.ui.camera.CameraFragment"
         android:label="@string/menu_alimentos"
         tools:layout="@layout/fragment_camera" />
+
+    <fragment
+        android:id="@+id/nav_calculotmb"
+        android:name="com.example.inutri.ui.calculotmb.CalculotmbFragment"
+        android:label="@string/menu_calculoTMB"
+        tools:layout="@layout/fragment_calculotmb" />
 </navigation>

@@ -69,7 +69,7 @@
             android:label="@string/title_activity_cadastro"
             android:theme="@style/Theme.INutri.Fullscreen" />
         <activity
-            android:name=".CalculoTMB"
+            android:name=".ui.calculotmb.CalculotmbFragment"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"

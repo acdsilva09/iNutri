@@ -14,5 +14,11 @@
             android:title="Alimentos">
 
         </item>
+        <item
+            android:id="@+id/nav_calculotmb"
+            android:icon="@drawable/scanner"
+            android:title="CalculoTMB">
+
+        </item>
     </group>
 </menu>

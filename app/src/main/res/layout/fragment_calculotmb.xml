@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".CalculoTMB">
+    tools:context=".ui.calculotmb.CalculotmbFragment">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -84,8 +84,7 @@
             android:text="Calcular"
             android:layout_gravity="center"
             tools:layout_editor_absoluteX="60dp"
-            tools:layout_editor_absoluteY="315dp"
-            android:onClick="clickButtonCalcular"/>
+            tools:layout_editor_absoluteY="315dp"/>
 
         <TextView
             android:id="@+id/textViewResultado"
