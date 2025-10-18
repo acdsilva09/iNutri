@@ -5,24 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-
     android:layout_gravity="center"
     android:gravity="center_horizontal"
     android:background="@drawable/main_background"
-
     tools:context=".LoginActivity">
 
-
-
-        <ImageView
-            android:layout_width="170dp"
-            android:layout_height="170dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
-            android:background="@drawable/logo"
-            />
-
-
+    <ImageView
+        android:layout_width="170dp"
+        android:layout_height="170dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/logo" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,103 +24,90 @@
         android:gravity="center"
         android:background="@drawable/login_screen">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
-
-
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/editTextUser"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="0dp"
-            android:background="@drawable/edit_text_login"
-            android:ems="10"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:maxLines="1" />
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/editTextPassword"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:ems="10"
-            android:layout_marginTop="40dp"
-            android:inputType="textPassword"
-            android:hint="Senha"
-            android:maxLines="1"
-            android:background="@drawable/edit_text_login"/>
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/buttonLogin"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="Entrar"
-            android:layout_marginTop="40dp"
-            android:theme="@style/Widget.AppCompat.Button.Colored"
-            android:background="@drawable/login_button"/>
-
-
         <LinearLayout
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"            >
+            android:gravity="center_horizontal">
 
-            <TextView
-                android:id="@+id/cadastro"
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/editTextUser"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="0dp"
+                android:background="@drawable/edit_text_login"
+                android:ems="10"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/editTextPassword"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:ems="10"
+                android:layout_marginTop="40dp"
+                android:inputType="textPassword"
+                android:hint="Senha"
+                android:maxLines="1"
+                android:background="@drawable/edit_text_login"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/buttonLogin"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Entrar"
+                android:layout_marginTop="40dp"
+                android:theme="@style/Widget.AppCompat.Button.Colored"
+                android:background="@drawable/login_button"/>
+
+            <LinearLayout
+                android:layout_marginTop="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:clickable="true"
-                android:textColor="#A3A1A1"
-                android:text="Cadastre-se"
-                android:textSize="12dp" />
-            <Space
-                android:layout_width="150dp"
-                android:layout_height="match_parent" />
+                android:orientation="horizontal">
+
+                <!-- id ajustado para bater com o código -->
+                <TextView
+                    android:id="@+id/textCadastro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:textColor="#A3A1A1"
+                    android:text="Cadastre-se"
+                    android:textSize="12dp" />
+
+                <Space
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent" />
+
+                <!-- id ajustado para bater com o código -->
+                <TextView
+                    android:id="@+id/textEsqueciSenha"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:textColor="#A3A1A1"
+                    android:scaleType="fitCenter"
+                    android:text="Recuperar senha"
+                    android:textSize="12dp" />
+            </LinearLayout>
+
             <TextView
-                android:id="@+id/recuperaSenha"
+                android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:clickable="true"
-                android:textColor="#A3A1A1"
-                android:scaleType="fitCenter"
-                android:text="Recuperar senha"
-                android:textSize="12dp" />
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:text="ou"
+                android:textColor="#A3A1A1"/>
 
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/buttonGoogleLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
-
-
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:text="ou"
-            android:textColor="#A3A1A1"/>
-
-
-
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/buttonGoogleLogin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
-
-
-
-
     </LinearLayout>
-
-
-    </LinearLayout>
-
-
 </LinearLayout>

@@ -1,46 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollCadastro"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_gravity="center"
-    android:gravity="center"
-    tools:context=".CadastroActivity">
+    android:fillViewport="true"
+    android:background="@android:color/white">
 
-    <EditText
-        android:id="@+id/cadastroNome"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/rootCadastro"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Nome"
-        android:layout_marginTop="10dp"/>
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <EditText
-        android:id="@+id/cadastroEmail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textEmailAddress"
-        android:hint="email"
-        android:maxLines="1"/>
+        <!-- Logo opcional (remova se não quiser) -->
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/logo" />
 
-    <EditText
-        android:id="@+id/cadastrSenha"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPassword"
-        android:hint="Password"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnCadastrar"
-        android:layout_width="180dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="10dp"
-        android:text="Cadastrar"
-        android:onClick="clickButtonFinalizaCadastro"/>
+            <TextView
+                android:id="@+id/txtTituloCadastro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/title_activity_cadastro"
+                android:textSize="20sp"
+                android:layout_marginBottom="12dp" />
+        </LinearLayout>
 
+        <!-- Nome -->
+        <EditText
+            android:id="@+id/cadastroNome"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="@string/hint_nome_completo"
+            android:inputType="textPersonName"
+            android:autofillHints="name"
+            android:importantForAutofill="yes"
+            android:maxLines="1"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
 
-</LinearLayout>
+        <!-- Espaço -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="12dp" />
+
+        <!-- E-mail -->
+        <EditText
+            android:id="@+id/cadastroEmail"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="@string/hint_email"
+            android:inputType="textEmailAddress"
+            android:autofillHints="emailAddress"
+            android:importantForAutofill="yes"
+            android:maxLines="1"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="12dp" />
+
+        <!-- Senha (atenção ao id: mantém compatível com a classe Java) -->
+        <EditText
+            android:id="@+id/cadastrSenha"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="@string/hint_senha"
+            android:inputType="textPassword"
+            android:autofillHints="password"
+            android:importantForAutofill="yes"
+            android:maxLines="1"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+        <!-- Botão concluir -->
+        <Button
+            android:id="@+id/btnFinalizarCadastro"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/btn_finalizar_cadastro"
+            android:onClick="clickButtonFinalizaCadastro" />
+
+        <!-- Links auxiliares (opcional) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/txtJaTemConta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ja_tem_conta" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

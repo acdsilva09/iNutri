@@ -3,24 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@id/nav_home">
 
     <fragment
         android:id="@+id/nav_home"
         android:name="com.example.inutri.ui.home.HomeFragment"
-        android:label="@string/menu_home"
+        android:label="@string/first_fragment_label"
         tools:layout="@layout/fragment_home" />
-
-
-    <fragment
-        android:id="@+id/nav_alimentos"
-        android:name="com.example.inutri.ui.camera.CameraFragment"
-        android:label="@string/menu_alimentos"
-        tools:layout="@layout/fragment_camera" />
-
-    <fragment
-        android:id="@+id/nav_calculotmb"
-        android:name="com.example.inutri.ui.calculotmb.CalculotmbFragment"
-        android:label="@string/menu_calculoTMB"
-        tools:layout="@layout/fragment_calculotmb" />
 </navigation>

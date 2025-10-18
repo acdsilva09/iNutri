@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<paths>
-    <external-path
-        name="my_images"
-        path="./" />
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- cache interno -->
+    <cache-path name="images" path="images/" />
+    <!-- cache externo (opcional) -->
+    <external-cache-path name="ext_images" path="images/" />
+    <!-- pasta files interna (se preferir salvar lá) -->
+    <files-path name="files" path="pictures/" />
 </paths>

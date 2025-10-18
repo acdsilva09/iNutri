@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_meal_item_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Linha: nome do alimento + gramas + kcal -->
+    <LinearLayout
+        android:id="@+id/row_title_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txtItemName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="Alimento"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/txtItemGrams"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="150 g"
+            android:textSize="14sp"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:id="@+id/txtItemKcal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="210 kcal"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Linha: macros (P/C/G) -->
+    <LinearLayout
+        android:id="@+id/row_macros"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:id="@+id/txtItemProtein"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P: 25 g"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/txtSeparator1"
+            android:layout_width="8dp"
+            android:layout_height="wrap_content"
+            android:text=" " />
+
+        <TextView
+            android:id="@+id/txtItemCarbs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="C: 20 g"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/txtSeparator2"
+            android:layout_width="8dp"
+            android:layout_height="wrap_content"
+            android:text=" " />
+
+        <TextView
+            android:id="@+id/txtItemFat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="G: 8 g"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Divisor -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="#1F000000" />
+
+</LinearLayout>

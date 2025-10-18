@@ -1,13 +1,8 @@
 package com.example.inutri;
 
-
-import static android.content.ContentValues.TAG;
-
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
+import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -20,29 +15,46 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
-
 import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LoginActivity extends AppCompatActivity {
 
-
-
-    ActivityLoginBinding binding;
-    GoogleSignInClient googleSignInClient;
-    //Button buttonLogin, buttonGoogleLogin;
-    //EditText editTextUser, editTextPassword;
+    private ActivityLoginBinding binding;
     private FirebaseAuth mAuth;
+    private GoogleSignInClient googleClient;
 
-
-
+    private final ActivityResultLauncher<Intent> googleLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getData() == null) {
+                    Toast.makeText(this, "Operação cancelada", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
+                try {
+                    GoogleSignInAccount account = task.getResult(ApiException.class);
+                    if (account == null || account.getIdToken() == null) {
+                        Toast.makeText(this, "Não foi possível obter o token", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    AuthCredential cred = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+                    mAuth.signInWithCredential(cred).addOnCompleteListener(this, t -> {
+                        if (t.isSuccessful()) {
+                            startMainActivity();
+                        } else {
+                            Toast.makeText(this, "Falha no login Google", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch (ApiException e) {
+                    Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,165 +64,69 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(
-                GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.web_client_id))
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                // use a string gerada pelo Firebase (default_web_client_id)
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
+        googleClient = GoogleSignIn.getClient(this, gso);
 
-        googleSignInClient = GoogleSignIn.getClient(this,googleSignInOptions);
+        binding.buttonLogin.setOnClickListener(v ->
+                clickButtonLogin(
+                        safe(binding.editTextUser.getText()),
+                        safe(binding.editTextPassword.getText()))
+        );
 
-        binding.buttonLogin.setOnClickListener(view -> clickButtonLogin(binding.editTextUser.getText().toString(),
-                binding.editTextPassword.getText().toString()));
+        binding.buttonGoogleLogin.setOnClickListener(v ->
+                googleLauncher.launch(googleClient.getSignInIntent())
+        );
 
-        binding.buttonGoogleLogin.setOnClickListener(v -> {
-            clickButtonLoginGoogle();
+        binding.textCadastro.setOnClickListener(v -> {
+            startActivity(new Intent(this, CadastroActivity.class));
         });
 
-
+        binding.textEsqueciSenha.setOnClickListener(v -> {
+            startActivity(new Intent(this, RecuperaCadastroActivity.class));
+        });
     }
-
-    private void clickButtonLoginGoogle() {
-        Intent intent = googleSignInClient.getSignInIntent();
-        startActivityForResult(intent,1);
-       // openActivity.launch(intent);
-    }
-
-    ActivityResultLauncher<Intent> openActivity = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if(result.getResultCode()== Activity.RESULT_OK){
-                    Intent intent = result.getData();
-
-                    Task<GoogleSignInAccount> tarefa = GoogleSignIn.getSignedInAccountFromIntent(intent);
-                    Log.d(TAG, "tarefa:"+ tarefa.getResult()+ "\nIntent:" + intent.getData());
-                    try {
-                        GoogleSignInAccount conta = tarefa.getResult(ApiException.class);
-                        loginGoogle(conta.getIdToken());
-                    } catch (ApiException e) {
-                        // Tratamento específico para ApiException ao obter a conta do Google Sign-In
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), "Erro ao efetuar login: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-    );
-
-    private void loginGoogle(String token) {
-
-        try {
-            AuthCredential authCredential = GoogleAuthProvider.getCredential(token, null);
-            mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Login Google Efetuado com Sucesso!!.",
-                            Toast.LENGTH_SHORT).show();
-                    startMainActivity();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Erro ao efetuar login Google",
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (RuntimeException e){
-
-        }
-    }
-
-    @Override
-    public void onActivityResult( int requestCode, int resultCode, Intent intent){
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        if (requestCode == 1) {
-            Task<GoogleSignInAccount> tarefa = GoogleSignIn.getSignedInAccountFromIntent(intent);
-
-            try {
-                        GoogleSignInAccount conta = tarefa.getResult(ApiException.class);
-                        Toast.makeText(getApplicationContext(), ""+ conta.getIdToken(),
-                        Toast.LENGTH_SHORT).show();
-                        if(!conta.getIdToken().isEmpty()){
-                            loginGoogle(conta.getIdToken());
-                        }else{
-                            Toast.makeText(getApplicationContext(), "Erro ao capturar Token",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                    } catch (ApiException e) {
-                        // Tratamento específico para ApiException ao obter a conta do Google Sign-In
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), "Erro ao efetuar login: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-        } else {
-            // Se o requestCode não for igual a 1, lidar com isso adequadamente
-            Toast.makeText(getApplicationContext(), "Código de solicitação inválido",
-                    Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
 
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        //updateUI(currentUser);
+        FirebaseUser current = mAuth.getCurrentUser();
+        if (current != null) startMainActivity();
     }
 
-    public void clickButtonCadastro(View v){
+    private void clickButtonLogin(@NonNull String email, @NonNull String password) {
+        if (email.isBlank() || password.isBlank()) {
+            Toast.makeText(this, "Informe e-mail e senha", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "E-mail inválido", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                startMainActivity();
+            } else {
+                String msg = "Falha na autenticação";
+                Exception e = task.getException();
+                if (e instanceof FirebaseAuthInvalidUserException) msg = "Usuário não encontrado";
+                else if (e instanceof FirebaseAuthInvalidCredentialsException) msg = "Credenciais inválidas";
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
-        Intent i = new Intent(LoginActivity.this, CadastroActivity.class);
+    private void startMainActivity() {
+        Intent i = new Intent(this, MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
-        finishAffinity();
+        finish();
     }
 
-    public void clickButtonRecuperaSenha(View v){
-
-        Intent i = new Intent(LoginActivity.this, RecuperaCadastroActivity.class);
-        startActivity(i);
-        finishAffinity();
+    private String safe(CharSequence cs) {
+        return cs == null ? "" : cs.toString().trim();
     }
-
-
-    private void clickButtonLogin(String email, String password ){
-
-        System.out.println("____________"+email+"________"+password);
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            //Log.d(TAG, "signInWithCustomToken:success");
-
-                            Toast.makeText(getApplicationContext(), "Login Efetuado com Sucesso!!.",
-                                    Toast.LENGTH_SHORT).show();
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            startMainActivity();
-
-
-
-
-                            //updateUI(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            //Log.w(TAG, "signInWithCustomToken:failure", task.getException());
-                            Toast.makeText(getApplicationContext(), "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            //updateUI(null);
-                        }
-                    }
-                });
-
-    }
-
-    public void startMainActivity(){
-        Intent i = new Intent(LoginActivity.this, MainActivity.class);
-        startActivity(i);
-        finishAffinity();
-    }
-
-
-
-
-
 }
