@@ -12,10 +12,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
-import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
@@ -25,34 +25,33 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.inutri.databinding.ActivityCaptureMealBinding;
 import com.example.inutri.model.DetectedFood;
 import com.example.inutri.ui.capture.CaptureViewModel;
-import androidx.camera.lifecycle.ProcessCameraProvider;
 import com.google.common.util.concurrent.ListenableFuture;
-import androidx.core.content.ContextCompat;
-
-
 
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Tela de captura da refeição (Etapa 1 do MVP).
- * - Mostra a câmera (CameraX)
- * - Captura a foto e gera um Uri via FileProvider
- * - Dispara a detecção via ViewModel
- * - Atualiza overlay/lista conforme resultados (você pluga os adapters)
- */
 public class CaptureMealActivity extends AppCompatActivity {
 
+    // ViewBinding e ViewModel
     private ActivityCaptureMealBinding binding;
     private CaptureViewModel viewModel;
 
+    // CameraX
     private ImageCapture imageCapture;
     private ExecutorService cameraExecutor;
 
+    // Debounce do analisador (tempo real)
+    private long lastAnalysisTs = 0L;
+    private static final long ANALYSIS_DEBOUNCE_MS = 250L; // ~4 fps
+
+    // Debounce de Toast (para não lotar a fila)
+    private long lastToastTs = 0L;
+    private static final long TOAST_DEBOUNCE_MS = 1500L;
+
+    // Permissão de câmera
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted) {
@@ -74,57 +73,41 @@ public class CaptureMealActivity extends AppCompatActivity {
 
         setupObservers();
         setupUi();
-
         ensureCameraPermissionAndStart();
     }
 
     private void setupUi() {
-        binding.btnCapture.setOnClickListener(v -> takePhoto());
-
-        // Se você tiver uma RecyclerView de itens detectados, plugue os adapters aqui.
-        // binding.recyclerDetected.setAdapter(new DetectedFoodAdapter(...));
-        // binding.recyclerConfirm.setAdapter(new MealItemAdapter(...));
+        if (binding.btnCapture != null) {
+            binding.btnCapture.setOnClickListener(v -> takePhoto());
+        }
     }
 
     private void setupObservers() {
+        viewModel.getDetectedFoods().observe(this, this::renderDetections);
         viewModel.getUiState().observe(this, state -> {
-            switch (state) {
-                case IDLE:
-                    // nada
-                    break;
-                case LOADING:
-                    // exibir um progresso se quiser
-                    break;
-                case ERROR:
-                    Toast.makeText(
-                            CaptureMealActivity.this,viewModel.getLastErrorText(),
-                            Toast.LENGTH_LONG
-                    ).show();
-                    break;
-                case READY:
-                    // resultados prontos (detecções feitas ou itens carregados)
-                    break;
+            if (state == CaptureViewModel.UiState.ERROR) {
+                CharSequence err = viewModel.getLastErrorText();
+                if (err != null && err.length() > 0) {
+                    Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
-        viewModel.getDetectedFoods().observe(this, this::renderDetections);
-        // viewModel.getMealItems().observe(this, items -> { /* atualizar lista/totais */ });
-        // viewModel.getTotals().observe(this, totals -> { /* atualizar UI com totais */ });
     }
 
     private void renderDetections(List<DetectedFood> detections) {
-        // Desenha as caixas no overlay (seu FoodOverlayView deve aceitar normalizado 0..1 ou px)
         if (binding.overlay != null) {
             binding.overlay.setDetections(detections);
             binding.overlay.invalidate();
         }
-        // Atualize a lista dos detectados (adapter) se quiser:
-        // detectedFoodAdapter.submitList(detections);
-        Toast.makeText(
-                this,
-                String.format(Locale.getDefault(), "Itens detectados: %d", detections.size()),
-                Toast.LENGTH_SHORT
-        ).show();
+        long now = System.currentTimeMillis();
+        if (now - lastToastTs >= TOAST_DEBOUNCE_MS) {
+            lastToastTs = now;
+            Toast.makeText(
+                    this,
+                    String.format(Locale.getDefault(), "Itens detectados: %d", detections.size()),
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     private void ensureCameraPermissionAndStart() {
@@ -147,19 +130,27 @@ public class CaptureMealActivity extends AppCompatActivity {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
 
                 Preview preview = new Preview.Builder().build();
-                preview.setSurfaceProvider(binding.previewView.getSurfaceProvider());
+                if (binding.previewView != null) {
+                    preview.setSurfaceProvider(binding.previewView.getSurfaceProvider());
+                }
 
                 imageCapture = new ImageCapture.Builder()
                         .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                         .build();
 
-                // Analisador opcional (tempo real). Mantemos vazio no MVP.
                 ImageAnalysis analysis = new ImageAnalysis.Builder()
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
+
                 analysis.setAnalyzer(cameraExecutor, (ImageProxy image) -> {
-                    // Se quiser detecção em tempo real, enviar frames aqui
-                    image.close();
+                    long now = System.currentTimeMillis();
+                    if (now - lastAnalysisTs < ANALYSIS_DEBOUNCE_MS) {
+                        image.close();
+                        return;
+                    }
+                    lastAnalysisTs = now;
+                    // ViewModel deve processar e FECHAR o ImageProxy internamente
+                    viewModel.onRealtimeFrame(image);
                 });
 
                 CameraSelector selector = CameraSelector.DEFAULT_BACK_CAMERA;
@@ -169,7 +160,7 @@ public class CaptureMealActivity extends AppCompatActivity {
                         this, selector, preview, imageCapture, analysis
                 );
 
-            } catch (ExecutionException | InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Erro ao iniciar a câmera", Toast.LENGTH_LONG).show();
                 finish();
@@ -198,6 +189,10 @@ public class CaptureMealActivity extends AppCompatActivity {
                                 "com.example.inutri.fileprovider",
                                 outFile
                         );
+                        // Concede permissão temporária caso a próxima Activity precise ler a foto
+                        grantUriPermission(getPackageName(), uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
                         onPhotoCaptured(uri);
                     }
 
@@ -212,12 +207,13 @@ public class CaptureMealActivity extends AppCompatActivity {
     }
 
     private void onPhotoCaptured(@NonNull Uri imageUri) {
-        // 1) dispara detecção (remota ou local) via ViewModel
-        viewModel.detectFoods(imageUri);
+        // Se quiser também rodar a detecção por foto única:
+        // viewModel.detectFoods(imageUri);
 
-        // 2) se quiser abrir uma tela de resumo após a confirmação,
-        // faça via observer quando MealItems estiver pronto.
-        // startActivity(new Intent(this, MealSummaryActivity.class).putExtra("photo", imageUri.toString()));
+        Intent i = new Intent(this, DetectionResultActivity.class);
+        i.putExtra("photo_uri", imageUri.toString());
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(i);
     }
 
     @Override

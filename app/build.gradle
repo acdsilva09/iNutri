@@ -59,6 +59,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.concurrent:concurrent-futures:1.1.0'  // fornece ListenableFuture
 
+    implementation "androidx.recyclerview:recyclerview:1.3.2"
+
 
 
     // Navigation (você usa NavController na MainActivity)
@@ -93,6 +95,8 @@ dependencies {
     implementation 'androidx.concurrent:concurrent-futures:1.1.0'
     implementation 'com.google.guava:guava:32.1.3-android'
     implementation 'com.google.android.gms:play-services-auth:21.1.1'
+
+    implementation 'com.google.mlkit:image-labeling:17.0.9'
 
 
 

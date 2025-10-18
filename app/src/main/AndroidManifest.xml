@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Marca câmera como opcional para permitir instalação em devices sem câmera -->
+    <!-- Câmera opcional para permitir instalação em devices sem câmera -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.INutri">
 
-        <!-- FileProvider para compartilhar arquivos de imagem (CameraX) -->
+        <!-- FileProvider p/ compartilhar o arquivo da foto dentro do app -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.inutri.fileprovider"
@@ -32,7 +32,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Launcher -->
+        <!-- Launcher / Splash -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -55,18 +55,32 @@
             android:name=".RecuperaCadastroActivity"
             android:exported="false" />
 
-        <!-- Host da navegação -->
+        <!-- Host principal -->
         <activity
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.INutri.NoActionBar" />
 
-        <!-- Nova tela de captura de refeição -->
+        <!-- Captura com CameraX -->
         <activity
             android:name=".CaptureMealActivity"
             android:exported="false"
             android:theme="@style/Theme.INutri.Fullscreen" />
+
+        <!-- Resultado da detecção (MOSTRE os itens detectados) -->
+        <activity
+            android:name=".DetectionResultActivity"
+            android:exported="false"
+            android:label="@string/title_detection_result"
+            android:parentActivityName=".CaptureMealActivity" />
+
+        <!-- Resumo nutricional (após o usuário ajustar as quantidades) -->
+        <activity
+            android:name=".NutritionSummaryActivity"
+            android:exported="false"
+            android:label="@string/title_nutrition_summary"
+            android:parentActivityName=".DetectionResultActivity" />
 
     </application>
 </manifest>

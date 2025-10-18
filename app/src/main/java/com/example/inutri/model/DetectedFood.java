@@ -1,18 +1,31 @@
 package com.example.inutri.model;
 
 import android.graphics.RectF;
+import androidx.annotation.Nullable;
 
-/** Resultado da detecção na imagem (rótulo + confiança + bbox normalizada). */
 public class DetectedFood {
-    public String label;       // ex.: "arroz", "feijão", "frango"
-    public float confidence;   // 0..1
-    public RectF bbox;         // coordenadas normalizadas (0..1) relativas ao preview
+    private final String name;
+    private final float confidence; // 0..1
+    @Nullable private final RectF box; // pode ser null (ML Kit de rótulos não dá caixa)
+    private final float gramsEstimate; // estimativa (pode ser 0f)
 
-    public DetectedFood() { }
-
-    public DetectedFood(String label, float confidence, RectF bbox) {
-        this.label = label;
-        this.confidence = confidence;
-        this.bbox = bbox;
+    public DetectedFood(String name, float confidence, Object o) {
+        this(name, confidence, null, 0f);
     }
+
+    public DetectedFood(String name, float confidence, @Nullable RectF box, float gramsEstimate) {
+        this.name = name;
+        this.confidence = confidence;
+        this.box = box;
+        this.gramsEstimate = gramsEstimate;
+    }
+
+    public String getName() { return name; }
+    public float getConfidence() { return confidence; }
+    @Nullable public RectF getBox() { return box; }
+    public float getGramsEstimate() { return gramsEstimate; }
+
+
+
+
 }

@@ -14,10 +14,7 @@ import com.example.inutri.model.DetectedFood;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Espera bboxes normalizadas (0..1) em DetectedFood.bbox.
- * Desenha um retângulo com rótulo no Preview.
- */
+/** Desenha caixas/labels das detecções (bboxes normalizadas 0..1). */
 public class FoodOverlayView extends View {
 
     private final Paint boxPaint = new Paint();
@@ -52,7 +49,7 @@ public class FoodOverlayView extends View {
         textPaint.setAntiAlias(true);
     }
 
-    public void setDetections(List<DetectedFood> list) {
+    public void setDetections(@Nullable List<DetectedFood> list) {
         detections = (list == null) ? new ArrayList<>() : list;
         invalidate();
     }
@@ -67,10 +64,13 @@ public class FoodOverlayView extends View {
 
         for (int i = 0; i < detections.size(); i++) {
             DetectedFood d = detections.get(i);
-            if (d == null || d.bbox == null) continue;
+            if (d == null) continue;
 
-            // Alterna cores básicas por item (sem estilos)
-            int color = 0xFFFF5722; // default
+            RectF bbox = d.getBox();
+            if (bbox == null) continue;
+
+            // Cores alternadas só p/ visualizar
+            int color = 0xFFFF5722;
             switch (i % 3) {
                 case 1: color = 0xFF3F51B5; break;
                 case 2: color = 0xFF388E3C; break;
@@ -78,19 +78,20 @@ public class FoodOverlayView extends View {
             boxPaint.setColor(color);
             textPaint.setColor(color);
 
-            // bbox normalizada -> pixels
+            // normalizado -> px
             temp.set(
-                    clamp(d.bbox.left, 0f, 1f) * w,
-                    clamp(d.bbox.top, 0f, 1f) * h,
-                    clamp(d.bbox.right, 0f, 1f) * w,
-                    clamp(d.bbox.bottom, 0f, 1f) * h
+                    clamp(bbox.left,   0f, 1f) * w,
+                    clamp(bbox.top,    0f, 1f) * h,
+                    clamp(bbox.right,  0f, 1f) * w,
+                    clamp(bbox.bottom, 0f, 1f) * h
             );
 
             canvas.drawRect(temp, boxPaint);
 
-            String label = (d.label == null ? "alimento" : d.label);
-            float conf = Math.max(0f, Math.min(1f, d.confidence));
+            String label = (d.getName() == null ? "alimento" : d.getName());
+            float conf = Math.max(0f, Math.min(1f, d.getConfidence()));
             String title = label + " (" + Math.round(conf * 100) + "%)";
+
             float tx = temp.left + 8f;
             float ty = Math.max(36f, temp.top + 36f);
             canvas.drawText(title, tx, ty, textPaint);
