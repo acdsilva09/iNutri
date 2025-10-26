@@ -1,4 +1,4 @@
-package com.example.inutri;
+package com.example.inutri.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +13,9 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.inutri.R;
 import com.example.inutri.databinding.ActivityMainBinding;
+import com.example.inutri.ui.capture.CaptureMealActivity;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Se quiser um FAB no app_bar_main, descomente:
         // binding.appBarMain.fab.setOnClickListener(v ->
-        //         startActivity(new Intent(this, com.example.inutri.CaptureMealActivity.class)));
+        //         startActivity(new Intent(this, com.example.inutri.ui.capture.CaptureMealActivity.class)));
     }
 
     @Override
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_capture_meal) {
-            startActivity(new Intent(this, com.example.inutri.CaptureMealActivity.class));
+            startActivity(new Intent(this, CaptureMealActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

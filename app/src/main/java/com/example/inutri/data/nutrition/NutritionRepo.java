@@ -1,6 +1,4 @@
-package com.example.inutri.nutrition;
-
-import com.example.inutri.nutrition.NutritionFacts;
+package com.example.inutri.data.nutrition;
 
 import java.text.Normalizer;
 import java.util.Collections;

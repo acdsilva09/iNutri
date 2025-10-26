@@ -5,7 +5,7 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NutritionSummaryActivity">
+    tools:context=".data.nutrition.NutritionSummaryActivity">
 
     <!-- Toolbar simples (opcional, se usa ActionBar pode remover) -->
     <com.google.android.material.appbar.MaterialToolbar

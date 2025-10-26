@@ -1,4 +1,4 @@
-package com.example.inutri;
+package com.example.inutri.ui.capture;
 
 import android.Manifest;
 import android.content.Intent;
@@ -21,52 +21,57 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.inutri.databinding.ActivityCaptureMealBinding;
 import com.example.inutri.model.DetectedFood;
-import com.example.inutri.ui.capture.CaptureViewModel;
+import com.example.inutri.ui.detection.DetectedFoodAdapter;
+import com.example.inutri.ui.detection.DetectionResultActivity;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CaptureMealActivity extends AppCompatActivity {
 
-    // ViewBinding e ViewModel
     private ActivityCaptureMealBinding binding;
     private CaptureViewModel viewModel;
 
-    // CameraX
     private ImageCapture imageCapture;
     private ExecutorService cameraExecutor;
 
-    // Debounce do analisador (tempo real)
     private long lastAnalysisTs = 0L;
-    private static final long ANALYSIS_DEBOUNCE_MS = 250L; // ~4 fps
+    private static final long ANALYSIS_DEBOUNCE_MS = 250L;
 
-    // Debounce de Toast (para não lotar a fila)
-    private long lastToastTs = 0L;
-    private static final long TOAST_DEBOUNCE_MS = 1500L;
-
-    // Permissão de câmera
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted) {
-                    startCamera();
-                } else {
+                if (granted) startCamera();
+                else {
                     Toast.makeText(this, "Permissão de câmera negada", Toast.LENGTH_LONG).show();
                     finish();
                 }
             });
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityCaptureMealBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // ✅ Adapter SEM parâmetros
+        DetectedFoodAdapter detectedAdapter = new DetectedFoodAdapter(
+                (position, label, grams) -> {
+                    // Aqui é opcional. Como esta tela só exibe a detecção em tempo real,
+                    // você pode deixar vazio (“no-op”) ou encaminhar para o ViewModel.
+                    // Ex.: viewModel.onUserTypedGrams(label, grams);
+                }
+        );
+        binding.recyclerDetected.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerDetected.setAdapter(detectedAdapter);
 
         viewModel = new ViewModelProvider(this).get(CaptureViewModel.class);
         cameraExecutor = Executors.newSingleThreadExecutor();
@@ -95,30 +100,18 @@ public class CaptureMealActivity extends AppCompatActivity {
     }
 
     private void renderDetections(List<DetectedFood> detections) {
-        if (binding.overlay != null) {
-            binding.overlay.setDetections(detections);
-            binding.overlay.invalidate();
-        }
-        long now = System.currentTimeMillis();
-        if (now - lastToastTs >= TOAST_DEBOUNCE_MS) {
-            lastToastTs = now;
-            Toast.makeText(
-                    this,
-                    String.format(Locale.getDefault(), "Itens detectados: %d", detections.size()),
-                    Toast.LENGTH_SHORT
-            ).show();
+        if (detections == null) detections = Collections.emptyList();
+        RecyclerView.Adapter<?> a = binding.recyclerDetected.getAdapter();
+        if (a instanceof DetectedFoodAdapter) {
+            ((DetectedFoodAdapter) a).submitList(detections);
         }
     }
 
     private void ensureCameraPermissionAndStart() {
         boolean granted = ContextCompat.checkSelfPermission(
                 this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-
-        if (granted) {
-            startCamera();
-        } else {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
-        }
+        if (granted) startCamera();
+        else cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
     }
 
     private void startCamera() {
@@ -149,16 +142,13 @@ public class CaptureMealActivity extends AppCompatActivity {
                         return;
                     }
                     lastAnalysisTs = now;
-                    // ViewModel deve processar e FECHAR o ImageProxy internamente
                     viewModel.onRealtimeFrame(image);
                 });
 
                 CameraSelector selector = CameraSelector.DEFAULT_BACK_CAMERA;
 
                 cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(
-                        this, selector, preview, imageCapture, analysis
-                );
+                cameraProvider.bindToLifecycle(this, selector, preview, imageCapture, analysis);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -182,22 +172,17 @@ public class CaptureMealActivity extends AppCompatActivity {
                 options,
                 ContextCompat.getMainExecutor(this),
                 new ImageCapture.OnImageSavedCallback() {
-                    @Override
-                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                    @Override public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         Uri uri = FileProvider.getUriForFile(
                                 CaptureMealActivity.this,
                                 "com.example.inutri.fileprovider",
                                 outFile
                         );
-                        // Concede permissão temporária caso a próxima Activity precise ler a foto
                         grantUriPermission(getPackageName(), uri,
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                         onPhotoCaptured(uri);
                     }
-
-                    @Override
-                    public void onError(@NonNull ImageCaptureException exception) {
+                    @Override public void onError(@NonNull ImageCaptureException exception) {
                         Toast.makeText(CaptureMealActivity.this,
                                 "Falha na captura: " + exception.getMessage(),
                                 Toast.LENGTH_LONG).show();
@@ -207,17 +192,13 @@ public class CaptureMealActivity extends AppCompatActivity {
     }
 
     private void onPhotoCaptured(@NonNull Uri imageUri) {
-        // Se quiser também rodar a detecção por foto única:
-        // viewModel.detectFoods(imageUri);
-
         Intent i = new Intent(this, DetectionResultActivity.class);
         i.putExtra("photo_uri", imageUri.toString());
         i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(i);
     }
 
-    @Override
-    protected void onDestroy() {
+    @Override protected void onDestroy() {
         super.onDestroy();
         if (cameraExecutor != null) cameraExecutor.shutdown();
     }

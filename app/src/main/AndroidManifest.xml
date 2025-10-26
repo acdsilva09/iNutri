@@ -34,7 +34,7 @@
 
         <!-- Launcher / Splash -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.auth.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.INutri">
             <intent-filter>
@@ -45,42 +45,42 @@
 
         <!-- Auth -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.auth.LoginActivity"
             android:exported="true" />
         <activity
-            android:name=".CadastroActivity"
+            android:name=".ui.auth.CadastroActivity"
             android:exported="true"
             android:theme="@style/Theme.INutri.Fullscreen" />
         <activity
-            android:name=".RecuperaCadastroActivity"
+            android:name=".ui.auth.RecuperaCadastroActivity"
             android:exported="false" />
 
         <!-- Host principal -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="false"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.INutri.NoActionBar" />
 
         <!-- Captura com CameraX -->
         <activity
-            android:name=".CaptureMealActivity"
+            android:name=".ui.capture.CaptureMealActivity"
             android:exported="false"
             android:theme="@style/Theme.INutri.Fullscreen" />
 
         <!-- Resultado da detecção (MOSTRE os itens detectados) -->
         <activity
-            android:name=".DetectionResultActivity"
+            android:name=".ui.detection.DetectionResultActivity"
             android:exported="false"
             android:label="@string/title_detection_result"
-            android:parentActivityName=".CaptureMealActivity" />
+            android:parentActivityName=".ui.capture.CaptureMealActivity" />
 
         <!-- Resumo nutricional (após o usuário ajustar as quantidades) -->
         <activity
-            android:name=".NutritionSummaryActivity"
+            android:name=".data.nutrition.NutritionSummaryActivity"
             android:exported="false"
             android:label="@string/title_nutrition_summary"
-            android:parentActivityName=".DetectionResultActivity" />
+            android:parentActivityName=".ui.detection.DetectionResultActivity" />
 
     </application>
 </manifest>

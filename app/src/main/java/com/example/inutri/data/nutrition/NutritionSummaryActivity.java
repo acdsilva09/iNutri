@@ -1,4 +1,4 @@
-package com.example.inutri;
+package com.example.inutri.data.nutrition;
 
 import android.os.Bundle;
 
@@ -6,8 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.inutri.R;
 import com.example.inutri.model.MealItem;
-import com.example.inutri.nutrition.NutritionFacts;
-import com.example.inutri.nutrition.NutritionRepo;
+import com.example.inutri.data.nutrition.NutritionFacts;
+import com.example.inutri.data.nutrition.NutritionRepo;
 
 import java.util.ArrayList;
 

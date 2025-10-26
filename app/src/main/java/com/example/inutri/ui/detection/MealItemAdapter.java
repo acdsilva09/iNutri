@@ -1,5 +1,6 @@
-package com.example.inutri.ui.capture;
+package com.example.inutri.ui.detection;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,6 @@ import java.util.Locale;
 public class MealItemAdapter extends RecyclerView.Adapter<MealItemAdapter.VH> {
 
     private final List<MealItem> items = new ArrayList<>();
-
-    public void submitList(List<MealItem> list) {
-        items.clear();
-        if (list != null) items.addAll(list);
-        notifyDataSetChanged();
-    }
 
     @NonNull
     @Override
@@ -71,4 +66,12 @@ public class MealItemAdapter extends RecyclerView.Adapter<MealItemAdapter.VH> {
             txtItemFat = itemView.findViewById(R.id.txtItemFat);
         }
     }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void submitMealItems(List<MealItem> newItems) {
+        items.clear();
+        if (newItems != null) items.addAll(newItems);
+        notifyDataSetChanged();
+    }
+
 }

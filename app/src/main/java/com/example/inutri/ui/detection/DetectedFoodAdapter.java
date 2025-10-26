@@ -1,4 +1,4 @@
-package com.example.inutri.ui;
+package com.example.inutri.ui.detection;
 
 import android.text.Editable;
 import android.text.TextWatcher;

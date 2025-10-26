@@ -1,4 +1,4 @@
-package com.example.inutri.nutrition;
+package com.example.inutri.data.nutrition;
 
 public class NutritionFacts {
     public final float kcal;

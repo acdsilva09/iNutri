@@ -1,4 +1,4 @@
-package com.example.inutri;
+package com.example.inutri.ui.auth;
 
 import android.os.Bundle;
 import android.util.Patterns;
