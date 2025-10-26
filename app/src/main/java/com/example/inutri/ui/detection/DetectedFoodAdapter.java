@@ -20,27 +20,38 @@ import java.util.function.Consumer;
 
 public class DetectedFoodAdapter extends ListAdapter<DetectedFood, DetectedFoodAdapter.VH> {
 
-    public interface OnGramsChanged {
-        void onChanged(int position, String label, float grams);
-    }
+    public interface OnGramsChanged { void onChanged(int position, String label, float grams); }
 
     private final OnGramsChanged onGramsChanged;
+
+    // estado dos campos digitados
+    private final java.util.Map<String, String> gramsByLabel = new java.util.HashMap<>();
 
     public DetectedFoodAdapter(OnGramsChanged onGramsChanged) {
         super(DIFF);
         this.onGramsChanged = onGramsChanged;
+        setHasStableIds(true); // ajuda o RecyclerView a manter foco
     }
 
-    static final DiffUtil.ItemCallback<DetectedFood> DIFF =
-            new DiffUtil.ItemCallback<DetectedFood>() {
-                @Override public boolean areItemsTheSame(DetectedFood o, DetectedFood n) {
-                    return o.getName().equalsIgnoreCase(n.getName());
-                }
-                @Override public boolean areContentsTheSame(DetectedFood o, DetectedFood n) {
-                    return o.getName().equals(n.getName())
-                            && o.getConfidence() == n.getConfidence();
-                }
-            };
+    // opcional: permitir a Activity compartilhar o mesmo Map
+    public void setExternalGramsMap(java.util.Map<String, String> external) {
+        gramsByLabel.clear();
+        if (external != null) gramsByLabel.putAll(external);
+        notifyDataSetChanged(); // chame isso raramente (não por tecla)
+    }
+
+    @Override public long getItemId(int position) {
+        return getItem(position).getName().hashCode();
+    }
+
+    static final DiffUtil.ItemCallback<DetectedFood> DIFF = new DiffUtil.ItemCallback<DetectedFood>() {
+        @Override public boolean areItemsTheSame(DetectedFood o, DetectedFood n) {
+            return o.getName().equalsIgnoreCase(n.getName());
+        }
+        @Override public boolean areContentsTheSame(DetectedFood o, DetectedFood n) {
+            return o.getName().equals(n.getName()) && o.getConfidence() == n.getConfidence();
+        }
+    };
 
     @NonNull @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -54,14 +65,24 @@ public class DetectedFoodAdapter extends ListAdapter<DetectedFood, DetectedFoodA
         DetectedFood item = getItem(position);
         h.tvLabel.setText(item.getName());
 
-        // Limpa listeners anteriores para evitar loops
         if (h.watcher != null) h.etGrams.removeTextChangedListener(h.watcher);
 
-        h.etGrams.setText(""); // default
+        // restaura o texto digitado (se houver) SEM causar flicker
+        String desired = gramsByLabel.getOrDefault(item.getName(), "");
+        if (!desired.equals(h.etGrams.getText().toString())) {
+            h.etGrams.setText(desired);
+            h.etGrams.setSelection(h.etGrams.getText().length());
+        }
+
         h.watcher = new SimpleTextWatcher(s -> {
-            float g = 0f;
-            try { g = Float.parseFloat(s.toString()); } catch (Exception ignore) {}
-            if (onGramsChanged != null) onGramsChanged.onChanged(h.getBindingAdapterPosition(), item.getName(), g);
+            String txt = s == null ? "" : s.toString();
+            gramsByLabel.put(item.getName(), txt);
+
+            if (onGramsChanged != null) {
+                float g = 0f;
+                try { g = Float.parseFloat(txt); } catch (Exception ignored) {}
+                onGramsChanged.onChanged(h.getBindingAdapterPosition(), item.getName(), g);
+            }
         });
         h.etGrams.addTextChangedListener(h.watcher);
     }
@@ -77,15 +98,12 @@ public class DetectedFoodAdapter extends ListAdapter<DetectedFood, DetectedFoodA
         }
     }
 
-    // util
     static class SimpleTextWatcher implements TextWatcher {
-        private final Consumer<CharSequence> onChange;
-        SimpleTextWatcher(Consumer<CharSequence> c) { onChange = c; }
-        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-        @Override public void onTextChanged(CharSequence s, int start, int before, int count) { onChange.accept(s); }
+        private final java.util.function.Consumer<CharSequence> onChange;
+        SimpleTextWatcher(java.util.function.Consumer<CharSequence> c) { onChange = c; }
+        @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+        @Override public void onTextChanged(CharSequence s, int st, int b, int c) { onChange.accept(s); }
         @Override public void afterTextChanged(Editable s) {}
-
-
-
     }
 }
+

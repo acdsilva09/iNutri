@@ -32,8 +32,11 @@ import com.example.inutri.ui.detection.DetectionResultActivity;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +47,8 @@ public class CaptureMealActivity extends AppCompatActivity {
 
     private ImageCapture imageCapture;
     private ExecutorService cameraExecutor;
+
+    private final Map<String, String> gramsMap = new HashMap<>();
 
     private long lastAnalysisTs = 0L;
     private static final long ANALYSIS_DEBOUNCE_MS = 250L;
@@ -63,15 +68,8 @@ public class CaptureMealActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // ✅ Adapter SEM parâmetros
-        DetectedFoodAdapter detectedAdapter = new DetectedFoodAdapter(
-                (position, label, grams) -> {
-                    // Aqui é opcional. Como esta tela só exibe a detecção em tempo real,
-                    // você pode deixar vazio (“no-op”) ou encaminhar para o ViewModel.
-                    // Ex.: viewModel.onUserTypedGrams(label, grams);
-                }
-        );
-        binding.recyclerDetected.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerDetected.setAdapter(detectedAdapter);
+
+
 
         viewModel = new ViewModelProvider(this).get(CaptureViewModel.class);
         cameraExecutor = Executors.newSingleThreadExecutor();
@@ -192,11 +190,29 @@ public class CaptureMealActivity extends AppCompatActivity {
     }
 
     private void onPhotoCaptured(@NonNull Uri imageUri) {
-        Intent i = new Intent(this, DetectionResultActivity.class);
-        i.putExtra("photo_uri", imageUri.toString());
-        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(i);
+        // Rode a detecção com a foto única
+        viewModel.detectFoods(imageUri);
+
+        // Observa UMA VEZ o resultado e navega
+        viewModel.getDetectedFoods().observe(this, detections -> {
+            viewModel.getDetectedFoods().removeObservers(this);
+            if (detections == null) detections = Collections.emptyList();
+
+            Intent i = new Intent(this, DetectionResultActivity.class);
+
+            // ✅ Passe a lista de detecções
+            // Se DetectedFood for Parcelable (recomendado):
+            i.putParcelableArrayListExtra("detections", new ArrayList<>(detections));
+
+            // Se quiser usar a foto também na próxima tela:
+            i.putExtra("photo_uri", imageUri.toString());
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(i);
+            viewModel.getPhotoDetections().removeObservers(this);
+        });
     }
+
 
     @Override protected void onDestroy() {
         super.onDestroy();

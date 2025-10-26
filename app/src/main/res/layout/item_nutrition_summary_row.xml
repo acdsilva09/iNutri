@@ -1,32 +1,54 @@
-<!-- res/layout/item_nutrition_summary_row.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:paddingVertical="10dp">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <TextView
-        android:id="@+id/tvFoodName"
+        android:id="@+id/txtItemName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Alimento"
         android:textStyle="bold"
-        android:textSize="15sp"
-        tools:text="Arroz cozido" />
+        android:text="Nome" />
 
     <TextView
-        android:id="@+id/tvGrams"
+        android:id="@+id/txtItemGrams"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="0 g"
-        tools:text="150 g" />
+        android:text="0 g" />
 
     <TextView
-        android:id="@+id/tvMacros"
+        android:id="@+id/txtItemKcal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Carb: 0 g  •  Prot: 0 g  •  Gord: 0 g  •  kcal: 0"
-        tools:text="Carb: 42 g  •  Prot: 3 g  •  Gord: 1 g  •  190 kcal" />
+        android:text="0 kcal" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txtItemProtein"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="P: 0 g" />
+
+        <TextView
+            android:id="@+id/txtItemCarbs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="C: 0 g" />
+
+        <TextView
+            android:id="@+id/txtItemFat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="G: 0 g" />
+    </LinearLayout>
 </LinearLayout>

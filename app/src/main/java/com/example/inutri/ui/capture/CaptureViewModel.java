@@ -2,6 +2,7 @@ package com.example.inutri.ui.capture;
 
 import android.app.Application;
 import android.media.Image;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
@@ -16,6 +17,7 @@ import com.example.inutri.ml.VisionService;
 import com.example.inutri.model.DetectedFood;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,7 +48,7 @@ public class CaptureViewModel extends AndroidViewModel {
     }
     /** Chame para cada frame do CameraX (em background via analyzer). */
     public void onRealtimeFrame(ImageProxy proxy) {
-        Image mediaImage = proxy.getImage();
+        @OptIn(markerClass = ExperimentalGetImage.class) Image mediaImage = proxy.getImage();
         if (mediaImage == null) { proxy.close(); return; }
         final int rotation = proxy.getImageInfo().getRotationDegrees();
         final InputImage input = InputImage.fromMediaImage(mediaImage, rotation);
@@ -71,6 +73,17 @@ public class CaptureViewModel extends AndroidViewModel {
         rtExecutor.shutdown();
     }
 
+
+    private final MutableLiveData<List<DetectedFood>> photoDetections = new MutableLiveData<>();
+    public LiveData<List<DetectedFood>> getPhotoDetections() { return photoDetections; }
+
+    public void detectFoods(Uri imageUri) {
+        // TODO: rodar sua detecção real. Exemplo fake:
+        List<DetectedFood> result = new ArrayList<>();
+        // result.add(new DetectedFood("Banana", 0.92f, null, 0f));
+        // ...
+        photoDetections.postValue(result);
+    }
 
 
 
