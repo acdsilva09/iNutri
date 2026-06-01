@@ -75,6 +75,12 @@
             android:label="@string/title_detection_result"
             android:parentActivityName=".ui.capture.CaptureMealActivity" />
 
+        <!-- Seleção de tipo de entrada de refeição -->
+        <activity
+            android:name=".ui.meal.AddMealActivity"
+            android:exported="false"
+            android:label="Adicionar Refeição" />
+
         <!-- Resumo nutricional (após o usuário ajustar as quantidades) -->
         <activity
             android:name=".data.nutrition.NutritionSummaryActivity"

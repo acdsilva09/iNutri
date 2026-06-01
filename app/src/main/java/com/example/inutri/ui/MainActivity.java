@@ -49,9 +49,9 @@ public class MainActivity extends AppCompatActivity {
         // itens do drawer navegando no NavController
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        // Se quiser um FAB no app_bar_main, descomente:
-        // binding.appBarMain.fab.setOnClickListener(v ->
-        //         startActivity(new Intent(this, com.example.inutri.ui.capture.CaptureMealActivity.class)));
+        // Configura o FAB para abrir a tela de Adicionar Refeição
+        binding.includeAppBarMain.fab.setOnClickListener(v ->
+                startActivity(new Intent(this, com.example.inutri.ui.meal.AddMealActivity.class)));
     }
 
     @Override

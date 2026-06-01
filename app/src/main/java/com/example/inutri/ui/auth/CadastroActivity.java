@@ -7,19 +7,14 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.inutri.databinding.ActivityCadastroBinding;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class CadastroActivity extends AppCompatActivity {
 
     private ActivityCadastroBinding binding;
-    private FirebaseAuth mAuth;
+    private AuthViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,55 +22,34 @@ public class CadastroActivity extends AppCompatActivity {
         binding = ActivityCadastroBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        mAuth = FirebaseAuth.getInstance();
+        viewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        setupObservers();
     }
 
-    // vincule este método no onClick do botão no XML, se ainda não estiver
+    private void setupObservers() {
+        viewModel.loading.observe(this, isLoading -> {
+            setInputsEnabled(!isLoading);
+            // Aqui você poderia mostrar um ProgressBar se tivesse um no XML
+        });
+
+        viewModel.error.observe(this, msg -> {
+            if (msg != null) Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        });
+
+        viewModel.cadastroSucesso.observe(this, sucesso -> {
+            if (sucesso) {
+                Toast.makeText(this, "Cadastro concluído", Toast.LENGTH_SHORT).show();
+                navegarParaLogin();
+            }
+        });
+    }
+
     public void clickButtonFinalizaCadastro(View v) {
-        String nome  = safeText(binding.cadastroNome);
+        String nome = safeText(binding.cadastroNome);
         String email = safeText(binding.cadastroEmail);
-        // atenção: seu layout antigo tinha "cadastrSenha" com typo; mantenha igual ao id real do XML
-        String senha = safeText(binding.cadastrSenha);
+        String senha = safeText(binding.cadastroSenha);
 
-        if (!validarCampos(nome, email, senha)) return;
-
-        setInputsEnabled(false);
-
-        mAuth.createUserWithEmailAndPassword(email, senha)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null && nome != null && !nome.isBlank()) {
-                            UserProfileChangeRequest req =
-                                    new UserProfileChangeRequest.Builder()
-                                            .setDisplayName(nome)
-                                            .build();
-                            user.updateProfile(req);
-                        }
-                        Toast.makeText(this, "Cadastro concluído", Toast.LENGTH_SHORT).show();
-                        navegarParaLogin();
-                    } else {
-                        String msg = traduzErro(task.getException());
-                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-                        setInputsEnabled(true);
-                    }
-                });
-    }
-
-    private boolean validarCampos(String nome, String email, String senha) {
-        if (nome.isBlank() || email.isBlank() || senha.isBlank()) {
-            Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, "E-mail inválido", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (senha.length() < 6) {
-            Toast.makeText(this, "A senha deve ter no mínimo 6 caracteres", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
+        viewModel.cadastrar(nome, email, senha);
     }
 
     private void navegarParaLogin() {
@@ -87,20 +61,6 @@ public class CadastroActivity extends AppCompatActivity {
         finish();
     }
 
-    private String traduzErro(Exception e) {
-        if (e == null) return "Erro ao finalizar cadastro";
-        if (e instanceof FirebaseAuthWeakPasswordException) {
-            return "Senha fraca. Use ao menos 6 caracteres";
-        }
-        if (e instanceof FirebaseAuthInvalidCredentialsException) {
-            return "E-mail inválido";
-        }
-        if (e instanceof FirebaseAuthUserCollisionException) {
-            return "Já existe uma conta com este e-mail";
-        }
-        return "Erro ao finalizar cadastro";
-    }
-
     private String safeText(android.widget.TextView tv) {
         return tv == null || tv.getText() == null ? "" : tv.getText().toString().trim();
     }
@@ -108,7 +68,7 @@ public class CadastroActivity extends AppCompatActivity {
     private void setInputsEnabled(boolean enabled) {
         binding.cadastroNome.setEnabled(enabled);
         binding.cadastroEmail.setEnabled(enabled);
-        binding.cadastrSenha.setEnabled(enabled); // mantenha o id igual ao do seu XML
+        binding.cadastroSenha.setEnabled(enabled); // id corrigido para 'cadastroSenha'
         // se tiver um botão dedicado, desabilite aqui também, ex.:
         // binding.btnFinalizarCadastro.setEnabled(enabled);
     }

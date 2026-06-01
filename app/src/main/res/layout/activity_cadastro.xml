@@ -73,9 +73,9 @@
             android:layout_width="match_parent"
             android:layout_height="12dp" />
 
-        <!-- Senha (atenção ao id: mantém compatível com a classe Java) -->
+        <!-- Senha (id corrigido para `cadastroSenha`) -->
         <EditText
-            android:id="@+id/cadastrSenha"
+            android:id="@+id/cadastroSenha"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="@string/hint_senha"

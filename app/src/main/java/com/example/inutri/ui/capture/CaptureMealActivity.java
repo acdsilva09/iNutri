@@ -21,11 +21,11 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.inutri.databinding.ActivityCaptureMealBinding;
 import com.example.inutri.model.DetectedFood;
+import com.example.inutri.model.api.NutritionResponse;
 import com.example.inutri.ui.detection.DetectedFoodAdapter;
 import com.example.inutri.ui.detection.DetectionResultActivity;
 
@@ -47,6 +47,7 @@ public class CaptureMealActivity extends AppCompatActivity {
 
     private ImageCapture imageCapture;
     private ExecutorService cameraExecutor;
+    private Uri lastCapturedUri;
 
     private final Map<String, String> gramsMap = new HashMap<>();
 
@@ -86,23 +87,48 @@ public class CaptureMealActivity extends AppCompatActivity {
     }
 
     private void setupObservers() {
-        viewModel.getDetectedFoods().observe(this, this::renderDetections);
+        // Removido observador de realtime detections (não tem mais recycler nesta tela)
         viewModel.getUiState().observe(this, state -> {
+            android.util.Log.d("CaptureActivity", "UI State changed to: " + state);
+            
+            boolean isLoading = (state == CaptureViewModel.UiState.LOADING);
+            
+            // Mantém o overlay visível durante o loading
+            binding.loadingOverlay.setVisibility(isLoading ? android.view.View.VISIBLE : android.view.View.GONE);
+            
+            // Desabilita o botão de captura para evitar múltiplos cliques
+            binding.btnCapture.setEnabled(!isLoading);
+            if (isLoading) {
+                binding.btnCapture.setAlpha(0.3f);
+            } else {
+                binding.btnCapture.setAlpha(1.0f);
+            }
+
             if (state == CaptureViewModel.UiState.ERROR) {
-                CharSequence err = viewModel.getLastErrorText();
-                if (err != null && err.length() > 0) {
+                String err = viewModel.getLastErrorText();
+                android.util.Log.e("CaptureActivity", "Error state: " + err);
+                if (err != null && !err.isEmpty()) {
                     Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        viewModel.getNutritionResult().observe(this, response -> {
+            if (response != null) {
+                android.util.Log.d("CaptureActivity", "Nutrition result received, navigating...");
+                onAnalysisComplete(response);
+            }
+        });
     }
 
-    private void renderDetections(List<DetectedFood> detections) {
-        if (detections == null) detections = Collections.emptyList();
-        RecyclerView.Adapter<?> a = binding.recyclerDetected.getAdapter();
-        if (a instanceof DetectedFoodAdapter) {
-            ((DetectedFoodAdapter) a).submitList(detections);
+    private void onAnalysisComplete(NutritionResponse response) {
+        Intent i = new Intent(this, DetectionResultActivity.class);
+        i.putExtra("nutrition_response", response);
+        if (lastCapturedUri != null) {
+            i.putExtra("photo_uri", lastCapturedUri.toString());
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
+        startActivity(i);
     }
 
     private void ensureCameraPermissionAndStart() {
@@ -157,7 +183,10 @@ public class CaptureMealActivity extends AppCompatActivity {
     }
 
     private void takePhoto() {
-        if (imageCapture == null) return;
+        if (imageCapture == null || viewModel.getUiState().getValue() == CaptureViewModel.UiState.LOADING) return;
+
+        // Inicia o estado de carregamento imediatamente ao clicar
+        viewModel.startLoading();
 
         File dir = new File(getCacheDir(), "images");
         if (!dir.exists()) dir.mkdirs();
@@ -171,14 +200,14 @@ public class CaptureMealActivity extends AppCompatActivity {
                 ContextCompat.getMainExecutor(this),
                 new ImageCapture.OnImageSavedCallback() {
                     @Override public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                        Uri uri = FileProvider.getUriForFile(
+                        lastCapturedUri = FileProvider.getUriForFile(
                                 CaptureMealActivity.this,
                                 "com.example.inutri.fileprovider",
                                 outFile
                         );
-                        grantUriPermission(getPackageName(), uri,
+                        grantUriPermission(getPackageName(), lastCapturedUri,
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        onPhotoCaptured(uri);
+                        onPhotoCaptured(lastCapturedUri);
                     }
                     @Override public void onError(@NonNull ImageCaptureException exception) {
                         Toast.makeText(CaptureMealActivity.this,
@@ -190,27 +219,8 @@ public class CaptureMealActivity extends AppCompatActivity {
     }
 
     private void onPhotoCaptured(@NonNull Uri imageUri) {
-        // Rode a detecção com a foto única
+        // Inicia a análise na API
         viewModel.detectFoods(imageUri);
-
-        // Observa UMA VEZ o resultado e navega
-        viewModel.getDetectedFoods().observe(this, detections -> {
-            viewModel.getDetectedFoods().removeObservers(this);
-            if (detections == null) detections = Collections.emptyList();
-
-            Intent i = new Intent(this, DetectionResultActivity.class);
-
-            // ✅ Passe a lista de detecções
-            // Se DetectedFood for Parcelable (recomendado):
-            i.putParcelableArrayListExtra("detections", new ArrayList<>(detections));
-
-            // Se quiser usar a foto também na próxima tela:
-            i.putExtra("photo_uri", imageUri.toString());
-            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            startActivity(i);
-            viewModel.getPhotoDetections().removeObservers(this);
-        });
     }
 
 
